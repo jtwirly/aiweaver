@@ -2,8 +2,9 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
+import { supabase } from './../lib/supabase';
 
-export default function Home() {
+export default function Home({ aiweaver }) {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
 
@@ -19,7 +20,7 @@ export default function Home() {
     const data = await res.json();
 
     // Set the response in the state
-    setResponse(data.choices[0].text);
+    setResponse(data.choices && data.choices[0] ? data.choices[0].text : '');
   };
 
   const handleSave = async () => {
@@ -60,7 +61,27 @@ export default function Home() {
         <p>
           <Link href="/saved-prompts">View Saved Prompts</Link>
         </p>
+
+        <ul>
+          {aiweaver.map((prompt) => (
+            <li key={prompt.id}>
+              <h2>{prompt.prompt}</h2>
+              <p>{prompt.response}</p>
+              <Link href={prompt.url}>Go to Prompt</Link>
+            </li>
+          ))}
+        </ul>
       </main>
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  let { data } = await supabase.from('prompts').select();
+
+  return {
+    props: {
+      aiweaver: data,
+    },
+  };
 }
