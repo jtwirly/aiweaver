@@ -9,7 +9,7 @@ const openai = new OpenAIApi(configuration);
 export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
-      const { id } = req.query;
+      const { id, userInput } = req.query;
       const { data, error } = await supabase
         .from("webapps")
         .select("*")
@@ -23,7 +23,6 @@ export default async function handler(req, res) {
         res.status(404).json({ error: "Web app not found" });
       } else {
         const { prompt } = data;
-        const { userInput } = req.query;
 
         const completion = await openai.createCompletion({
           model: "text-davinci-003",
@@ -49,10 +48,3 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
-
-console.log('id:', id);
-const { data, error } = await supabase
-  .from("webapps")
-  .select("*")
-  .eq("id", id)
-  .single();

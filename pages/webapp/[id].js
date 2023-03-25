@@ -22,17 +22,18 @@ export default function UserWebapp() {
     } else {
       setWebappData(data);
     }
-  };  
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const { data } = await fetch(`/api/airesponse?id=${id}&userInput=${userInput}`).then((res) => res.json());
+      const response = await fetch(`/api/airesponse?id=${id}&userInput=${userInput}`);
+      const data = await response.json();
       setResponse(data.text);
     } catch (error) {
       console.error('Error generating AI response:', error);
     }
-  };  
+  };
 
   if (!webappData) {
     return <div>Loading...</div>;
