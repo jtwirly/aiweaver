@@ -16,6 +16,6 @@ export default async function handler(req, res) {
       return;
     }
     // Send the URL as a response
-    res.status(201).json({ url });
+    res.status(201).json({ url, id });
   }
 }
