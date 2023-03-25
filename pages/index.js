@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unknown-property */
+
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -15,7 +17,7 @@ export default function Home({ aiweaver }) {
   const [response, setResponse] = useState('');
   const [id, setId] = useState(uuidv4()); // Generate a unique ID for the new record
 
-  const handleSave = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
     // Generate a unique ID for the new record
@@ -25,7 +27,7 @@ export default function Home({ aiweaver }) {
     const res = await fetch('/api/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, subtitle, inputplaceholder, buttonname, prompt, disclaimer }),
+      body: JSON.stringify({ id, prompt, html: JSON.stringify({ title, subtitle, inputplaceholder, buttonname, disclaimer }) }),
     });    
     const data = await res.json();
     
@@ -33,14 +35,14 @@ export default function Home({ aiweaver }) {
     setResponse(data.choices && data.choices[0] ? data.choices[0].text : '');
   };  
 
-  const handleSubmit = async (event) => {
+  const handleSave = async (event) => {
     event.preventDefault();
   
     // Generate a unique ID for the new record
     const id = nanoid();
   
     // Submit prompt to the API route and fetch the response
-    const res = await fetch('/api/prompt', {
+    const res = await fetch('/api/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, title, subtitle, inputplaceholder, buttonname, prompt, disclaimer }),

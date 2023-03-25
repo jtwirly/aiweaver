@@ -1,44 +1,58 @@
 const { Configuration, OpenAIApi } = require("openai");
+const { supabase } = require("../../lib/supabase");
 
-//Setup OpenAI
 const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
-const handler = async (req, res) => {
-    switch (req.method) {
-        case 'GET':
-            await getAdvice(req, res);
-            break;
-        default:
-            res.setHeader('Allow', ['GET'])
-            res.status(405).end(`Method ${req.method} Not Allowed`)
-    }
-
-}
-
-const getAdvice = async (req, res) => {
+export default async function handler(req, res) {
+  if (req.method === "GET") {
     try {
-        const completion = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: `As a kind, supportive and ethical friend, please provide encouragement on the following topic: ${req.query.prompt}. If the topic is unclear, please ask for clarification.`,
-            max_tokens: 200,
-            temperature: 0.8,
-        });        
+      const { id } = req.query;
+      const { data, error } = await supabase
+        .from("webapps")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-        // Clean up the text output
+      if (error) {
+        console.error("Error fetching web app data:", error.message);
+        res.status(500).json({ error: error.message });
+      } else if (!data) {
+        res.status(404).json({ error: "Web app not found" });
+      } else {
+        const { prompt } = data;
+        const { userInput } = req.query;
+
+        const completion = await openai.createCompletion({
+          model: "text-davinci-003",
+          prompt: `${prompt}: ${userInput}`,
+          max_tokens: 150,
+          n: 1,
+          stop: null,
+          temperature: 1,
+        });
+
         const text = completion.data.choices[0].text.trim();
-        const cleanedText = text.replace(/^[.,\s]+|[.,\s]+$/g, '');
+        const cleanedText = text.replace(/^[.,\s]+|[.,\s]+$/g, "");
 
         res.status(200).json({ text: cleanedText });
+      }
     } catch (error) {
-        if (error.response) {
-            res.status(error.response.status).send(error.response.data);
-        } else {
-            res.status(500).send(error.message);
-        }
+      console.error("Error generating AI response:", error);
+      console.error('Error response:', error.response?.data); // Add this line to inspect the error response
+      res.status(500).json({ error: error.message });
     }
+  } else {
+    res.setHeader("Allow", ["GET"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
 }
 
-export default handler;
+console.log('id:', id);
+const { data, error } = await supabase
+  .from("webapps")
+  .select("*")
+  .eq("id", id)
+  .single();
