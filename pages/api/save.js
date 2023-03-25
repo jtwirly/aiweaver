@@ -7,6 +7,7 @@ export default async function handler(req, res) {
     const id = uuidv4(); // Generate a unique ID for the new record
     const url = `/${nanoid()}`;
     const { title, subtitle, inputplaceholder, buttonname, prompt, disclaimer } = req.body;
+    console.log('Received data:', req.body);
 
     // Save the data to the database
     const { data, error } = await supabase.from('webapps').insert([{ id, title, subtitle, inputplaceholder, buttonname, prompt, disclaimer, url }]);
