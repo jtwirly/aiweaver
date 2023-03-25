@@ -26,7 +26,7 @@ export default function Create() {
     if (res.ok) {
       const data = await res.json();
       console.log(data);
-      setUrl(data.url); // Update the URL state variable
+      setUrl(`/webapp/${data.url}`); // Update the URL state variable
     } else {
       console.error('Error saving webapp:', res.status);
     }
