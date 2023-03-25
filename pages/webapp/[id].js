@@ -26,9 +26,13 @@ export default function UserWebapp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const aiResponse = await assistant.generate({ prompt: `${webappData.prompt}: ${userInput}`, maxTokens: 150 });
-    setResponse(aiResponse.choices[0].text);
-  };
+    try {
+      const { data } = await fetch(`/api/airesponse?id=${id}&userInput=${userInput}`).then((res) => res.json());
+      setResponse(data.text);
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+    }
+  };  
 
   if (!webappData) {
     return <div>Loading...</div>;
