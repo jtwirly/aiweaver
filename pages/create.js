@@ -17,15 +17,20 @@ export default function Create() {
     event.preventDefault();
 
     // save the user-generated data to the database
-    const { data, error } = await fetch('/api/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, subtitle, inputplaceholder, buttonname, prompt, disclaimer }),
-      }).then((res) => res.json());
-    // Do something with the form data
-    console.log('Title:', title);
-    console.log('Subtitle:', subtitle);
-    console.log('Response data:', data);
+    const res = await fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, subtitle, inputplaceholder, buttonname, prompt, disclaimer }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log(data);
+      setUrl(`/webapp${data.url}`); // Update the URL state variable
+    } else {
+      console.error('Error saving webapp:', res.status);
+    }
+
     // Clear the form
     setTitle('');
     setSubtitle('');
@@ -33,13 +38,6 @@ export default function Create() {
     setButtonname('');
     setPrompt('');
     setDisclaimer('');
-    // set the response in the state
-    if (data) {
-      console.log(data);
-      setUrl(`/webapp/${data.id}`); // Update the URL state variable
-    } else {
-      console.error(error);
-    }
   };
 
   return (

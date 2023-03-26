@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export default function UserWebapp() {
   const router = useRouter();
@@ -15,8 +15,8 @@ export default function UserWebapp() {
     }
   }, [id]);
 
-  const fetchWebappData = async (id) => {
-    const { data, error } = await supabase.from('webapps').select('*').eq('id', id).single();
+  const fetchWebappData = async (url) => {
+    const { data, error } = await supabase.from('webapps').select('*').eq('url', `/${id}`).single();
     if (error) {
       console.error('Error fetching web app data:', error.message);
     } else {
@@ -27,39 +27,33 @@ export default function UserWebapp() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const res = await fetch(`/api/save?prompt=${userInput}`);
-      const data = await res.json();
+      const response = await fetch(`/api/airesponse?id=${id}&userInput=${userInput}`);
+      const data = await response.json();
       setResponse(data.text);
     } catch (error) {
-    console.error('Error generating AI response:', error);
+      console.error('Error generating AI response:', error);
     }
-    };
-    
-    if (!webappData) {
-        return <div>Loading...</div>;
-      }
-      
-      return (
-        <div>
-          <h1>User Webapp ID: {id}</h1>
-          <h1>{webappData.title}</h1>
-          <h2>{webappData.subtitle}</h2>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder={webappData.inputplaceholder}
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-            />
-            <button type="submit">{webappData.buttonname}</button>
-          </form>
-          {response && (
-            <div>
-              <strong>Response:</strong>
-              <p>{response}</p>
-            </div>
-          )}
-          <p>{webappData.disclaimer}</p>
-        </div>
-      );
-          }      
+  };
+
+  if (!webappData) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <h1>{webappData.title}</h1>
+      <h2>{webappData.subtitle}</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder={webappData.inputplaceholder}
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+        />
+        <button type="submit">{webappData.buttonname}</button>
+      </form>
+      {response && <div><strong>Response:</strong><p>{response}</p></div>}
+      <p>{webappData.disclaimer}</p>
+    </div>
+  );
+}
